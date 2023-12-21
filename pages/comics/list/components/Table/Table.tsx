@@ -1,0 +1,110 @@
+import Button from '@/components/Button';
+import Pagination from '../Pagination';
+import { Comic } from '../../../../../src/pages/comics/types';
+import Image from 'next/image';
+
+type TableProps = {
+  comics: Comic[];
+  currentPage: number;
+  totalPage: number;
+  isLoading?: boolean;
+  onChangePage: (currentPage: number) => void;
+  onRowComicClicked: (item: Comic) => void;
+  onEditComicClicked: (item: Comic) => void;
+};
+
+const Table = ({
+  comics = [],
+  currentPage,
+  totalPage,
+  isLoading,
+  onChangePage,
+  onRowComicClicked,
+  onEditComicClicked,
+}: TableProps) => {
+  return (
+    <div className="overflow-x-auto">
+      <table className="table border border-solid rounded-md mt-3">
+        <thead className="bg-neutral dark:bg-slate-700 text-white dark:text-slate-300 rounded-md">
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Publication Year</th>
+            <th>Rating</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading ? (
+            <tr>
+              <td colSpan={4}>
+                <div className="flex justify-center items-center">
+                  <span className="loading loading-spinner loading-lg content-center bg-cyan-300" />
+                </div>
+              </td>
+            </tr>
+          ) : (
+            comics.map((item: Comic) => (
+              <tr
+                key={item.id}
+                className="cursor-pointer hover:bg-slate-100"
+                onClick={() => onRowComicClicked(item)}
+              >
+                <td>
+                  <div className="flex flex-row items-center">
+                    <div className="avatar p-1">
+                      <div className="mask mask-squircle w-14 h-14">
+                        <Image
+                          src={item.thumbnail ?? ''}
+                          alt="comic thumbnail"
+                          width={20}
+                          height={20}
+                          priority={false}
+                        />
+                      </div>
+                    </div>
+                    {item.title}
+                  </div>
+                </td>
+                <td>{item.author}</td>
+                <td>{item.publicationYear}</td>
+                <td>
+                  <div className="flex flex-row items-center">
+                    <div className="rating mr-1">
+                      <input
+                        type="radio"
+                        name="rating-1"
+                        className="mask mask-star-2 bg-orange-400"
+                      />
+                    </div>
+                    {item.rating}
+                  </div>
+                </td>
+                <td>
+                  <Button
+                    id="btn-edit"
+                    title="Edit"
+                    onClick={() => onEditComicClicked(item)}
+                    className="pl-5 pr-5"
+                    small
+                  />
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+      <div className="flex flex-row pt-2 pb-2">
+        <div>
+          <span className="text-sm">
+            Page {currentPage}/{totalPage}
+          </span>
+        </div>
+        <div className="flex-1" />
+        <Pagination totalPage={totalPage} onChangePage={onChangePage} />
+      </div>
+    </div>
+  );
+};
+
+export default Table;
