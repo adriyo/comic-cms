@@ -12,6 +12,8 @@ const TextFieldComponent = (
       }
     }
   };
+  const fileTypePrefixStyle = props.type === 'file' ? 'file-' : '';
+  const className = props.className ?? '';
   return (
     <div className={`mb-4 ${props.containerClassName}`}>
       {props.label ? (
@@ -24,8 +26,9 @@ const TextFieldComponent = (
         type={props.type}
         name={props.id}
         id={props.id}
-        className={`${props.className} input input-bordered
-        ${props.isFullWidth ? ' w-full ' : ''}
+        className={`${className} ${fileTypePrefixStyle}input ${fileTypePrefixStyle}input-bordered ${
+          props.isFullWidth ? ' w-full ' : ''
+        }
       ${props.errorMessage ? ' input-error ' : ''}
       ${props.small ? ' input-sm ' : ''}
       `}

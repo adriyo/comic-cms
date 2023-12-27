@@ -68,7 +68,7 @@ const ComicDetail = () => {
                 <article>{detailResponse?.description}</article>
                 {detailResponse?.genres?.map((genre) => (
                   <div className="badge badge-ghost mr-1" key={genre.id}>
-                    {genre.title}
+                    {genre.label}
                   </div>
                 ))}
               </div>

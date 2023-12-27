@@ -17,8 +17,8 @@ export interface InputProps {
 }
 
 export interface Select2Props extends InputProps {
-  options: Option[];
-  onOptionSelected?: (option: Option) => void;
+  options: SelectOption[];
+  onOptionSelected?: (option: SelectOption) => void;
   control: any;
 }
 
@@ -29,11 +29,6 @@ export interface TextFieldProps extends InputProps {
 
 export interface TextAreaProps extends InputProps {
   onChange?: ChangeEventHandler<HTMLTextAreaElement>;
-}
-
-export interface Option {
-  value: string;
-  label: string;
 }
 
 export interface SelectProps extends InputProps {

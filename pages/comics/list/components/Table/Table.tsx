@@ -30,7 +30,7 @@ const Table = ({
             <th>Title</th>
             <th>Author</th>
             <th>Publication Year</th>
-            <th>Rating</th>
+            <th>Status</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -55,7 +55,7 @@ const Table = ({
                     <div className="avatar p-1">
                       <div className="mask mask-squircle w-14 h-14">
                         <Image
-                          src={item.thumbnail ?? ''}
+                          src={getThumbnailInfo(item.thumbnail).src}
                           alt="comic thumbnail"
                           width={20}
                           height={20}
@@ -66,19 +66,10 @@ const Table = ({
                     {item.title}
                   </div>
                 </td>
-                <td>{item.author}</td>
-                <td>{item.publicationYear}</td>
+                <td>{item.author.label}</td>
+                <td>{formatDateToString(item.publicationYear)}</td>
                 <td>
-                  <div className="flex flex-row items-center">
-                    <div className="rating mr-1">
-                      <input
-                        type="radio"
-                        name="rating-1"
-                        className="mask mask-star-2 bg-orange-400"
-                      />
-                    </div>
-                    {item.rating}
-                  </div>
+                  <div className="flex flex-row items-center">{item.status}</div>
                 </td>
                 <td>
                   <Button
@@ -105,6 +96,25 @@ const Table = ({
       </div>
     </div>
   );
+};
+
+const formatDateToString = (date: Date): string => {
+  const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+};
+
+const getThumbnailInfo = (thumbnail: string | undefined): { src: string; type?: string } => {
+  if (!thumbnail) {
+    return { src: '' };
+  }
+
+  const isBase64 = /^data:([a-zA-Z]+\/[a-zA-Z]+);base64,/.test(thumbnail);
+
+  if (isBase64) {
+    return { src: thumbnail, type: thumbnail.split(';')[0].split(':')[1] };
+  } else {
+    return { src: thumbnail };
+  }
 };
 
 export default Table;

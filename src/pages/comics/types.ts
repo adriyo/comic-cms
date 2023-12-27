@@ -1,17 +1,18 @@
+import { SelectOption } from '@/components/Input/types';
+
 export type Comic = {
-  id: number;
-  slugId: string;
+  id: string;
   title: string;
-  author: string;
+  author: SelectOption;
   updatedAt: string;
   thumbnail?: string;
-  publicationYear: number;
-  rating: number;
+  publicationYear: Date;
+  rating?: number;
   tags?: Tag[];
   status?: string;
-  artist?: Artist[];
+  artist?: SelectOption[];
   description?: string;
-  genres?: Genre[];
+  genres?: SelectOption[];
 };
 
 export type Genre = {
@@ -34,4 +35,14 @@ export type Artist = {
 export type Tag = {
   id: number;
   label: string;
+};
+
+export type ComicRequest = {
+  title: string;
+  author: SelectOption;
+  thumbnail: File;
+  publicationYear: Date;
+  status: string;
+  description?: string;
+  genre: SelectOption;
 };

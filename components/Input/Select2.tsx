@@ -1,6 +1,6 @@
 import { useController } from 'react-hook-form';
 import { ChangeEvent, ForwardedRef, forwardRef, useEffect, useRef, useState } from 'react';
-import { Option, Select2Props } from './types';
+import { Select2Props, SelectOption } from './types';
 import { MdArrowDropDown } from 'react-icons/md';
 
 const Select2 = (
@@ -17,8 +17,8 @@ const Select2 = (
   ref: ForwardedRef<HTMLInputElement>,
 ) => {
   const [visible, setVisible] = useState<boolean>(false);
-  const [options, setOptions] = useState<Option[]>([]);
-  const [selectedOption, setSelectedOption] = useState<Option | null>();
+  const [options, setOptions] = useState<SelectOption[]>([]);
+  const [selectedOption, setSelectedOption] = useState<SelectOption | null>();
   const shouldShowOptionsRef = useRef<boolean>(false);
   const {
     field: { onChange, ...fields },
@@ -33,7 +33,7 @@ const Select2 = (
     setOptions(filteredOptions);
   };
 
-  const handleOptionClick = (option: Option) => {
+  const handleOptionClick = (option: SelectOption) => {
     setSelectedOption(option);
     setVisible(false);
     onOptionSelected && onOptionSelected(option);

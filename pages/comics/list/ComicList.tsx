@@ -54,7 +54,7 @@ const ComicsPage = () => {
     const copyComics = structuredClone(comics);
     const filteredComics = copyComics.filter((i: Comic) => {
       if (queryBy == 'by-author') {
-        return i.author.toLowerCase().includes(query.toLowerCase());
+        return i.author.label.toLowerCase().includes(query.toLowerCase());
       } else {
         return i.title.toLowerCase().includes(query.toLowerCase());
       }
@@ -67,7 +67,7 @@ const ComicsPage = () => {
   };
 
   function handleItemComicClicked(item: Comic): void {
-    router.push(Routes.DETAIL_COMIC + '/' + item.slugId);
+    router.push(Routes.DETAIL_COMIC + '/' + item.id);
   }
 
   function handleEditComicClicked(item: Comic): void {
