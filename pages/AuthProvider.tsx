@@ -8,7 +8,8 @@ const AuthProvider = ({ children }: any) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      if (router.pathname === '/login' || router.pathname === '/') {
+      const allowedRoutes: string[] = [Routes.LOGIN, Routes.REGISTER, Routes.MAIN];
+      if (allowedRoutes.includes(router.pathname)) {
         setIsAuthenticated(true);
       } else if (!localStorage.getItem(LocalStorageKeys.ACCESS_TOKEN)) {
         router.push(Routes.LOGIN);

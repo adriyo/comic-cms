@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/router';
-import { LocalStorageKeys } from '../../utils/constants';
+import { LocalStorageKeys, Routes } from '../../utils/constants';
 import Button from '@/components/Button';
 import { TextField } from '@/components/Input';
 
@@ -9,6 +9,10 @@ const LoginPage = () => {
   const [emailError, setEmailError] = useState<string | null>();
   const [passwordError, setPasswordError] = useState<string | null>();
   const router = useRouter();
+
+  const onRegisterClicked = () => {
+    router.push(Routes.REGISTER);
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,6 +69,16 @@ const LoginPage = () => {
                 </label>
               </div>
               <Button id="btn-login" title="Login" loading={loading} type={'submit'} isFullWidth />
+              <div className="divider">or</div>
+              <Button
+                id="btn-register"
+                title="Register"
+                loading={loading}
+                type={'button'}
+                isFullWidth
+                className="btn-outline"
+                onClick={onRegisterClicked}
+              />
             </div>
           </form>
         </div>

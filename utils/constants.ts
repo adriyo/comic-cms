@@ -6,6 +6,7 @@ export const LocalStorageKeys = {
 export const Routes = {
   MAIN: '/',
   LOGIN: '/login',
+  REGISTER: '/register',
   COMICS: '/comics',
   SETTINGS: '/settings',
   PROPERTIES: '/properties',
