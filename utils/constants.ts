@@ -1,3 +1,7 @@
+import getConfig from 'next/config';
+
+const { publicRuntimeConfig } = getConfig();
+
 export const LocalStorageKeys = {
   ACCESS_TOKEN: 'accessToken',
   USER_INFO: 'userInfo',
@@ -15,3 +19,7 @@ export const Routes = {
   CREATE_CHAPTER: '/comics/chapter/create',
   EDIT_CHAPTER: '/comics/chapter/create',
 } as const;
+
+export const ApiRoute = {
+  LOGIN: publicRuntimeConfig.baseUrl + '/user/login',
+};

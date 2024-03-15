@@ -17,7 +17,7 @@ const Button = ({
       className={`${isFullWidth ? 'w-full' : null} btn btn-neutral ${
         small ? 'btn-sm text-xs' : null
       } ${className ?? className}`}
-      disabled={loading}
+      disabled={disabled}
       onClick={(e) => {
         e.stopPropagation();
         onClick ? onClick() : null;

@@ -4,6 +4,9 @@ const nextConfig = {
   images: {
     domains: ['images.unsplash.com', 'cdn.myanimelist.net'],
   },
+  publicRuntimeConfig: {
+    baseUrl: process.env.BASE_URL,
+  },
 };
 
 module.exports = nextConfig;

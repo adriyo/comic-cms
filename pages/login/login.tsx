@@ -1,20 +1,35 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { LocalStorageKeys, Routes } from '../../utils/constants';
+import { Routes } from '@/utils/constants';
 import Button from '@/components/Button';
 import { TextField } from '@/components/Input';
+import { toast } from 'react-toastify';
+import { useLogin } from '@/src/pages/user/hooks';
 
 const LoginPage = () => {
-  const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>();
   const [passwordError, setPasswordError] = useState<string | null>();
   const router = useRouter();
+  const { isLoading, error, data, mutate } = useLogin();
 
   const onRegisterClicked = () => {
     router.push(Routes.REGISTER);
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (data && data.data) {
+      toast.success(`${data.message}`, { hideProgressBar: true });
+      router.replace(Routes.MAIN);
+    }
+  }, [data, router]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(`${error}`, { hideProgressBar: true });
+    }
+  }, [error]);
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
@@ -28,13 +43,10 @@ const LoginPage = () => {
       return;
     }
     setPasswordError(null);
-    setLoading(true);
-
-    setTimeout(() => {
-      localStorage.setItem(LocalStorageKeys.ACCESS_TOKEN, 'accessToken');
-      setLoading(false);
-      router.replace('/');
-    }, 2000);
+    mutate({
+      email: formData.get('txt-email') as string,
+      password: formData.get('txt-password') as string,
+    });
   };
 
   return (
@@ -49,7 +61,7 @@ const LoginPage = () => {
                 label="Your Email"
                 placeholder="name@company.com"
                 type="email"
-                enabled={loading}
+                enabled={isLoading}
                 errorMessage={emailError}
                 isFullWidth
               />
@@ -58,7 +70,7 @@ const LoginPage = () => {
                 type="password"
                 label="Password"
                 placeholder="*********"
-                enabled={loading}
+                enabled={isLoading}
                 errorMessage={passwordError}
                 isFullWidth
               />
@@ -68,13 +80,20 @@ const LoginPage = () => {
                   <span className="ml-3 label-text">Remember me</span>
                 </label>
               </div>
-              <Button id="btn-login" title="Login" loading={loading} type={'submit'} isFullWidth />
+              <Button
+                id="btn-login"
+                title="Login"
+                loading={isLoading}
+                disabled={isLoading}
+                type={'submit'}
+                isFullWidth
+              />
               <div className="divider">or</div>
               <Button
                 id="btn-register"
                 title="Register"
-                loading={loading}
                 type={'button'}
+                disabled={isLoading}
                 isFullWidth
                 className="btn-outline"
                 onClick={onRegisterClicked}
