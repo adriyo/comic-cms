@@ -4,9 +4,11 @@ import { TextField } from '@/components/Input';
 import { Routes } from '@/utils/constants';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useRegister } from './hooks';
+import { toast } from 'react-toastify';
 
 const validationSchema = z.object({
   name: z.string().min(1, { message: 'Required name' }),
@@ -46,7 +48,7 @@ const SuccessModal = ({
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const { isLoading, error, data, mutate } = useRegister();
   const [successModalVisible, setSuccessModalVisible] = useState(false);
   type ValidationSchema = z.infer<typeof validationSchema>;
   const {
@@ -57,12 +59,24 @@ const RegisterPage = () => {
     resolver: zodResolver(validationSchema),
   });
 
-  const onSubmit: SubmitHandler<ValidationSchema> = async (data) => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+  useEffect(() => {
+    if (error) {
+      toast.error(`${error}`, { hideProgressBar: true });
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (data) {
       setSuccessModalVisible(true);
-    }, 1000);
+    }
+  }, [data]);
+
+  const onSubmit: SubmitHandler<ValidationSchema> = async (data) => {
+    mutate({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    });
   };
 
   const onSuccessClose = () => {
@@ -107,7 +121,7 @@ const RegisterPage = () => {
                 title="Submit"
                 type="submit"
                 isFullWidth
-                loading={loading}
+                loading={isLoading}
               />
             </div>
           </form>

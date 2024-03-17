@@ -2,6 +2,8 @@ import getConfig from 'next/config';
 
 const { publicRuntimeConfig } = getConfig();
 
+const BASE_URL = publicRuntimeConfig.baseUrl;
+
 export const LocalStorageKeys = {
   ACCESS_TOKEN: 'accessToken',
   USER_INFO: 'userInfo',
@@ -21,5 +23,10 @@ export const Routes = {
 } as const;
 
 export const ApiRoute = {
-  LOGIN: publicRuntimeConfig.baseUrl + '/user/login',
-};
+  LOGIN: BASE_URL + '/user/login',
+  REGISTER: BASE_URL + '/user/register',
+} as const;
+
+Object.freeze(Routes);
+Object.freeze(LocalStorageKeys);
+Object.freeze(ApiRoute);
