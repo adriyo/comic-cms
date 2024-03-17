@@ -4,13 +4,13 @@ import HeaderContainer from '@/components/HeaderContainer';
 import { Select2, Select, TextArea, TextDatePicker, TextField } from '@/components/Input';
 import { SelectOption } from '@/components/Input/types';
 import RootLayout from '@/components/RootLayout';
-import { useComic } from '@/src/pages/comics/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { z } from 'zod';
+import { useComic } from '../hooks';
 
 const MAX_FILE_SIZE = 500000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];

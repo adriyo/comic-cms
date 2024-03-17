@@ -1,5 +1,5 @@
 import Button from '@/components/Button';
-import { Chapter } from '../../../src/pages/comics/types';
+import { Chapter } from '../types';
 import Pagination from '../list/components/Pagination';
 import { Routes } from '@/utils/constants';
 import Link from 'next/link';

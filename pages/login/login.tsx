@@ -4,7 +4,7 @@ import { Routes } from '@/utils/constants';
 import Button from '@/components/Button';
 import { TextField } from '@/components/Input';
 import { toast } from 'react-toastify';
-import { useLogin } from '@/src/pages/user/hooks';
+import { useLogin } from '@/pages/login/hooks';
 
 const LoginPage = () => {
   const [emailError, setEmailError] = useState<string | null>();

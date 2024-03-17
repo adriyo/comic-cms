@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { Routes } from '../../../utils/constants';
 import Button from '@/components/Button';
 import { ChangeEventHandler, useEffect, useState } from 'react';
-import { Comic } from '../../../src/pages/comics/types';
+import { Comic } from '../types';
 import { TextField } from '@/components/Input';
 import Table from './components/Table';
 import { useRouter } from 'next/router';
-import { useFetchComics } from '../../../src/pages/comics/hooks';
+import { useFetchComics } from '../hooks';
 import ContentContainer from '@/components/ContentContainer';
 
 const TextSearch = ({

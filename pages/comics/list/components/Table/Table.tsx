@@ -1,6 +1,6 @@
 import Button from '@/components/Button';
 import Pagination from '../Pagination';
-import { Comic } from '../../../../../src/pages/comics/types';
+import { Comic } from '../../../types';
 import Image from 'next/image';
 
 type TableProps = {
