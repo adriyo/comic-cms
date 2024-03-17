@@ -25,6 +25,7 @@ export const Routes = {
 export const ApiRoute = {
   LOGIN: BASE_URL + '/user/login',
   REGISTER: BASE_URL + '/user/register',
+  COMICS: BASE_URL + '/comics',
 } as const;
 
 Object.freeze(Routes);

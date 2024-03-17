@@ -6,7 +6,8 @@ export type Comic = {
   author: SelectOption;
   updatedAt: string;
   thumbnail?: string;
-  publicationYear: Date;
+  image_cover: string | null;
+  published_date: string | null;
   rating?: number;
   tags?: Tag[];
   status?: string;
@@ -46,3 +47,21 @@ export type ComicRequest = {
   description?: string;
   genre: SelectOption;
 };
+
+export type ComicsResponse = {
+  data: Comic[];
+  total_pages: number;
+  totalCount: number;
+  message: string;
+};
+
+export interface ChapterResponse {
+  data: Chapter[];
+  totalPage: number;
+  totalCount: number;
+}
+
+export interface PagingRequest {
+  page: number;
+  limit: number;
+}

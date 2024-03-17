@@ -9,6 +9,7 @@ import Table from './components/Table';
 import { useRouter } from 'next/router';
 import { useFetchComics } from '../hooks';
 import ContentContainer from '@/components/ContentContainer';
+import { toast } from 'react-toastify';
 
 const TextSearch = ({
   onChange,
@@ -43,12 +44,12 @@ const ComicsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSearch, setSelectedSearchBy] = useState('by-title');
   const router = useRouter();
-  const { response, loading } = useFetchComics({ page: currentPage });
-  const [comics, setComics] = useState<Comic[]>(response.data);
+  const { data, isLoading, error } = useFetchComics({ page: currentPage, limit: 10 });
+  const [comics, setComics] = useState<Comic[]>(data?.data || []);
 
   const handleSearch = (query: string, queryBy: string) => {
     if (!query) {
-      setComics(response.data);
+      setComics(data?.data || []);
       return;
     }
     const copyComics = structuredClone(comics);
@@ -75,8 +76,14 @@ const ComicsPage = () => {
   }
 
   useEffect(() => {
-    setComics(response.data);
-  }, [response]);
+    setComics(data?.data || []);
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(`${error}`, { hideProgressBar: true });
+    }
+  }, [error]);
 
   return (
     <ContentContainer>
@@ -91,10 +98,10 @@ const ComicsPage = () => {
         </Link>
       </div>
       <Table
-        isLoading={loading}
+        isLoading={isLoading}
         comics={comics}
         currentPage={currentPage}
-        totalPage={response.totalPage}
+        totalPage={data?.total_pages || 0}
         onChangePage={handleChangePage}
         onRowComicClicked={handleItemComicClicked}
         onEditComicClicked={handleEditComicClicked}

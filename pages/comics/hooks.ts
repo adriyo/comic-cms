@@ -1,51 +1,32 @@
 import { useEffect, useState } from 'react';
 import { generateDummyChapters, generateRandomSlugId } from './mocks';
-import { Chapter, Comic, ComicRequest } from './types';
+import { ChapterResponse, Comic, ComicRequest, ComicsResponse, PagingRequest } from './types';
+import { useQuery } from 'react-query';
+import { ApiRoute, LocalStorageKeys } from '@/utils/constants';
 
-export type ComicsResponse = {
-  data: Comic[];
-  totalPage: number;
-  totalCount: number;
-};
-
-export interface ChapterResponse {
-  data: Chapter[];
-  totalPage: number;
-  totalCount: number;
-}
-
-const useFetchComics = ({ page = 1 }) => {
-  const pageSize = 10;
-  const [loading, setLoading] = useState<boolean>(true);
-  const [response, setResponse] = useState<ComicsResponse>({
-    data: [],
-    totalPage: 0,
-    totalCount: 0,
+const fetchComics = (data: PagingRequest) =>
+  fetch(`${ApiRoute.COMICS}?page=${data.page}&limit=${data.limit}`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${localStorage.getItem(LocalStorageKeys.ACCESS_TOKEN)}`,
+    },
+  }).then(async (res) => {
+    const data = (await res.json()) as ComicsResponse;
+    if (!res.ok) {
+      throw Error(data.message);
+    }
+    return data;
   });
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = () => {
-      setTimeout(() => {
-        const existingComicsJSON = localStorage.getItem('savedComics');
-        const parsedComics = parseComicsData(existingComicsJSON);
-
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedComics = parsedComics.slice(startIndex, endIndex);
-
-        setResponse({
-          data: paginatedComics,
-          totalPage: Math.ceil(parsedComics.length / pageSize),
-          totalCount: parsedComics.length,
-        });
-        setLoading(false);
-      }, 1000);
-    };
-
-    fetchData();
-  }, [page]);
-  return { response, loading };
+const useFetchComics = (req: PagingRequest) => {
+  const { isLoading, error, data } = useQuery<ComicsResponse, Error>({
+    queryKey: ['comics', req.page, req.limit],
+    queryFn: () => fetchComics(req),
+    keepPreviousData: true,
+  });
+  return { data, isLoading, error };
 };
 
 const useFetchDetail = (id: string) => {
@@ -138,7 +119,8 @@ const parseComicsData = (comicsDataJSON: string | null) => {
     author: comic.author || '',
     updatedAt: comic.updatedAt || '',
     thumbnail: comic.thumbnail || '',
-    publicationYear: comic.publicationYear ? new Date(comic.publicationYear) : new Date(),
+    image_cover: null,
+    published_date: null,
     rating: comic.rating || 0,
     tags: comic.tags || [],
     status: comic.status || '',
@@ -164,10 +146,11 @@ const useComic = () => {
         author: request.author,
         status: request.status,
         thumbnail: thumbnailBase64,
+        image_cover: null,
         description: request.description,
         genres: [request.genre!],
         updatedAt: Date(),
-        publicationYear: request.publicationYear,
+        published_date: null,
       };
 
       await new Promise((resolve) => setTimeout(resolve, 1000));

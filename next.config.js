@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['images.unsplash.com', 'cdn.myanimelist.net'],
+    domains: ['images.unsplash.com', 'cdn.myanimelist.net', 'localhost'],
   },
   publicRuntimeConfig: {
     baseUrl: process.env.BASE_URL,

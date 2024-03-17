@@ -55,7 +55,7 @@ const Table = ({
                     <div className="avatar p-1">
                       <div className="mask mask-squircle w-14 h-14">
                         <Image
-                          src={getThumbnailInfo(item.thumbnail).src}
+                          src={getThumbnailInfo(item.image_cover).src}
                           alt="comic thumbnail"
                           width={20}
                           height={20}
@@ -66,8 +66,8 @@ const Table = ({
                     {item.title}
                   </div>
                 </td>
-                <td>{item.author.label}</td>
-                <td>{formatDateToString(item.publicationYear)}</td>
+                <td>{item.author?.label ? item.author.label : 'Unknown'}</td>
+                <td>{formatDateToString(item.published_date)}</td>
                 <td>
                   <div className="flex flex-row items-center">{item.status}</div>
                 </td>
@@ -98,12 +98,14 @@ const Table = ({
   );
 };
 
-const formatDateToString = (date: Date): string => {
+const formatDateToString = (date: string | null): string => {
+  if (!date) return '-';
+  const parsedDate = new Date(date);
   const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  return parsedDate.toLocaleDateString('en-US', options);
 };
 
-const getThumbnailInfo = (thumbnail: string | undefined): { src: string; type?: string } => {
+const getThumbnailInfo = (thumbnail: string | null): { src: string; type?: string } => {
   if (!thumbnail) {
     return { src: '' };
   }
