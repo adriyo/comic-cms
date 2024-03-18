@@ -1,17 +1,8 @@
 import Button from '@/components/Button';
 import Pagination from '../Pagination';
-import { Comic } from '../../../types';
+import { Author, Comic } from '../../../types';
 import Image from 'next/image';
-
-type TableProps = {
-  comics: Comic[];
-  currentPage: number;
-  totalPage: number;
-  isLoading?: boolean;
-  onChangePage: (currentPage: number) => void;
-  onRowComicClicked: (item: Comic) => void;
-  onEditComicClicked: (item: Comic) => void;
-};
+import { TableProps } from './types';
 
 const Table = ({
   comics = [],
@@ -66,7 +57,7 @@ const Table = ({
                     {item.title}
                   </div>
                 </td>
-                <td>{item.author?.label ? item.author.label : 'Unknown'}</td>
+                <td>{getAuthorNames(item.authors)}</td>
                 <td>{formatDateToString(item.published_date)}</td>
                 <td>
                   <div className="flex flex-row items-center">{item.status}</div>
@@ -117,6 +108,11 @@ const getThumbnailInfo = (thumbnail: string | null): { src: string; type?: strin
   } else {
     return { src: thumbnail };
   }
+};
+
+const getAuthorNames = (authors: Author[]) => {
+  if (authors.length == 0) return 'Unknown';
+  return authors.map((author) => author.name).join(', ');
 };
 
 export default Table;

@@ -1,9 +1,9 @@
 import { SelectOption } from '@/components/Input/types';
 
-export type Comic = {
+export interface Comic {
   id: string;
   title: string;
-  author: SelectOption;
+  authors: Author[];
   updatedAt: string;
   thumbnail?: string;
   image_cover: string | null;
@@ -14,31 +14,36 @@ export type Comic = {
   artist?: SelectOption[];
   description?: string;
   genres?: SelectOption[];
-};
+}
 
-export type Genre = {
+export interface Author {
+  id: number;
+  name: string;
+}
+
+export interface Genre {
   id: string;
   title: string;
-};
+}
 
-export type Chapter = {
+export interface Chapter {
   id: number;
   title: string;
   createdAt: string;
   updatedAt: string;
-};
+}
 
-export type Artist = {
+export interface Artist {
   id: number;
   name: string;
-};
+}
 
-export type Tag = {
+export interface Tag {
   id: number;
   label: string;
-};
+}
 
-export type ComicRequest = {
+export interface ComicRequest {
   title: string;
   author: SelectOption;
   thumbnail: File;
@@ -46,14 +51,14 @@ export type ComicRequest = {
   status: string;
   description?: string;
   genre: SelectOption;
-};
+}
 
-export type ComicsResponse = {
+export interface ComicsResponse {
   data: Comic[];
   total_pages: number;
   totalCount: number;
   message: string;
-};
+}
 
 export interface ChapterResponse {
   data: Chapter[];

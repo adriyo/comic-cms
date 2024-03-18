@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Routes } from '../../../utils/constants';
 import Button from '@/components/Button';
 import { ChangeEventHandler, useEffect, useState } from 'react';
-import { Comic } from '../types';
+import { Author, Comic } from '../types';
 import { TextField } from '@/components/Input';
 import Table from './components/Table';
 import { useRouter } from 'next/router';
@@ -55,7 +55,9 @@ const ComicsPage = () => {
     const copyComics = structuredClone(comics);
     const filteredComics = copyComics.filter((i: Comic) => {
       if (queryBy == 'by-author') {
-        return i.author.label.toLowerCase().includes(query.toLowerCase());
+        return i.authors.some((author: Author) =>
+          author.name.toLowerCase().includes(query.toLowerCase()),
+        );
       } else {
         return i.title.toLowerCase().includes(query.toLowerCase());
       }
