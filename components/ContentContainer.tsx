@@ -11,7 +11,7 @@ const ContentContainer: React.FC<ContentContainerProps> = ({
   className,
   removeInnerPadding,
 }) => {
-  const containerClassName = `${removeInnerPadding ? '' : 'p-6'} bg-white ${className || ''}`;
+  const containerClassName = `${removeInnerPadding ? '' : 'p-6'} bg-white ${className || ''} w-[calc(100vw-24rem)]`;
   return <div className={containerClassName}>{children}</div>;
 };
 

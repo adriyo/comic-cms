@@ -116,7 +116,7 @@ const parseComicsData = (comicsDataJSON: string | null) => {
   const parsedComics = parsedData.map((comic: Comic) => ({
     id: comic.id || '',
     title: comic.title || '',
-    author: comic.author || '',
+    authors: comic.authors || '',
     updatedAt: comic.updatedAt || '',
     thumbnail: comic.thumbnail || '',
     image_cover: null,
@@ -143,7 +143,7 @@ const useComic = () => {
       const comic: Comic = {
         id: generateRandomSlugId(),
         title: request.title,
-        author: request.author,
+        authors: [{ id: request.author.id, name: request.author.label }],
         status: request.status,
         thumbnail: thumbnailBase64,
         image_cover: null,

@@ -11,6 +11,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { z } from 'zod';
 import { useComic } from '../hooks';
+import { useOptions } from './hooks';
 
 const MAX_FILE_SIZE = 500000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -32,26 +33,6 @@ const validationSchema = z.object({
   description: z.string().min(1, { message: 'Required description' }),
 });
 
-const authorOptions: SelectOption[] = [
-  { id: 1, value: 'akira-toriyama', label: 'Akira Toriyama' },
-  { id: 1, value: 'masashi-kishimoto', label: 'Masashi Kishimoto' },
-  { id: 1, value: 'hirohiko-araki', label: 'Hirohiko Araki' },
-  { id: 1, value: 'mashima-hiro', label: 'Mashima Hiro' },
-];
-
-const genreOptions: SelectOption[] = [
-  { id: 1, value: 'action', label: 'Action' },
-  { id: 2, value: 'adventure', label: 'Adventure' },
-  { id: 3, value: 'drama', label: 'Drama' },
-  { id: 4, value: 'fantasy', label: 'Fantasy' },
-];
-
-const statusOptions: SelectOption[] = [
-  { id: 1, value: 'ongoing', label: 'On Going' },
-  { id: 2, value: 'hiatus', label: 'Hiatus' },
-  { id: 3, value: 'ongoing', label: 'Completed' },
-];
-
 const CreateComicPage = () => {
   type ValidationSchema = z.infer<typeof validationSchema>;
   const {
@@ -64,6 +45,11 @@ const CreateComicPage = () => {
   });
 
   const { loading, error, saveComic } = useComic();
+  const { genreOptions, authorOptions, statusOptions } = useOptions();
+  const router = useRouter();
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [author, setAuthor] = useState<string>();
+  const [genre, setGenre] = useState<string>();
 
   const onSubmit: SubmitHandler<ValidationSchema> = async (data) => {
     try {
@@ -89,11 +75,6 @@ const CreateComicPage = () => {
       toast.error(`Data gagal disimpan: ${error}`, { hideProgressBar: true });
     }
   };
-  const router = useRouter();
-
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [author, setAuthor] = useState<string>();
-  const [genre, setGenre] = useState<string>();
 
   if (error != null) {
     toast.error(`Error: ${error}`, { hideProgressBar: true });

@@ -23,7 +23,7 @@ export interface Author {
 
 export interface Genre {
   id: string;
-  title: string;
+  name: string;
 }
 
 export interface Chapter {
