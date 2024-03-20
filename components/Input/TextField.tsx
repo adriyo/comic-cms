@@ -52,6 +52,7 @@ const TextFieldComponent = ({ ...props }: TextFieldProps, ref: ForwardedRef<HTML
           disabled={props.enabled}
           onChange={props.onChange}
           onKeyDown={handleKeyDown}
+          pattern={props.pattern}
         />
         {showPasswordIcon ? (
           <IconVisibility show={showPassword} onClick={handleToggleVisibility} />

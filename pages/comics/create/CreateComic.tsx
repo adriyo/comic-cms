@@ -1,26 +1,28 @@
 import Button from '@/components/Button';
 import ContentContainer from '@/components/ContentContainer';
 import HeaderContainer from '@/components/HeaderContainer';
-import { Select2, Select, TextArea, TextDatePicker, TextField } from '@/components/Input';
+import { Select2, Select, TextArea, TextField } from '@/components/Input';
 import { SelectOption } from '@/components/Input/types';
 import RootLayout from '@/components/RootLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { z } from 'zod';
-import { useComic } from '../hooks';
-import { useOptions } from './hooks';
+import { useComic, useOptions } from './hooks';
 
 const MAX_FILE_SIZE = 500000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 const validationSchema = z.object({
   title: z.string().min(1, { message: 'Required title' }),
-  status: z.string().min(1, { message: 'Required status' }),
-  author: z.string().min(1, { message: 'Required author' }),
-  genre: z.string().min(1, { message: 'Required genre' }),
+  alternativeTitle: z.string().optional(),
+  status: z.string(),
+  type: z.string(),
+  author: z.string().optional(),
+  genre: z.string().optional(),
+  publishedDate: z.string().optional(),
   thumbnail: z
     .custom<File[]>()
     .refine((files) => files?.length == 1, 'Image is required.')
@@ -29,11 +31,16 @@ const validationSchema = z.object({
       (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
       '.jpg, .jpeg, .png and .webp files are accepted.',
     ),
-  publishedAt: z.date(),
   description: z.string().min(1, { message: 'Required description' }),
 });
 
 const CreateComicPage = () => {
+  const { genreOptions, authorOptions, statusOptions, typeOptions } = useOptions();
+  const { isLoading, error, mutate } = useComic();
+  const router = useRouter();
+  const [author, setAuthor] = useState<string>();
+  const [genre, setGenre] = useState<string>();
+
   type ValidationSchema = z.infer<typeof validationSchema>;
   const {
     register,
@@ -42,50 +49,58 @@ const CreateComicPage = () => {
     formState: { errors },
   } = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
+    defaultValues: {
+      status: statusOptions[0].value,
+      type: typeOptions[0].value,
+    },
   });
 
-  const { loading, error, saveComic } = useComic();
-  const { genreOptions, authorOptions, statusOptions } = useOptions();
-  const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [author, setAuthor] = useState<string>();
-  const [genre, setGenre] = useState<string>();
-
   const onSubmit: SubmitHandler<ValidationSchema> = async (data) => {
-    try {
-      const selectedGenre: SelectOption | undefined = genreOptions.find(
-        (option) => option.value === data.genre,
-      );
-      const selectedAuthor: SelectOption | undefined = authorOptions.find(
-        (option) => option.value === data.author,
-      );
+    const selectedGenre: SelectOption | undefined = genreOptions.find(
+      (option) => option.value === data.genre,
+    );
+    const selectedAuthor: SelectOption | undefined = authorOptions.find(
+      (option) => option.value === data.author,
+    );
+    const selectedStatus: SelectOption | undefined = statusOptions.find(
+      (option) => option.value === data.status,
+    );
+    const selectedType: SelectOption | undefined = typeOptions.find(
+      (option) => option.value === data.type,
+    );
 
-      await saveComic({
+    const genreIds = selectedGenre ? [selectedGenre.id] : undefined;
+    const authorIds = selectedAuthor ? [selectedAuthor.id] : undefined;
+
+    mutate(
+      {
         title: data.title,
-        author: selectedAuthor!,
-        publicationYear: data.publishedAt,
-        genre: selectedGenre!,
+        alternativeTitle: data.alternativeTitle,
+        authors: authorIds,
+        type: selectedType?.id!,
+        published_date: data.publishedDate,
+        genres: genreIds,
         description: data.description,
-        thumbnail: data.thumbnail[0],
-        status: data.status,
-      });
-      toast.success('Data berhasil disimpan', { hideProgressBar: true });
-      router.back();
-    } catch (error) {
-      toast.error(`Data gagal disimpan: ${error}`, { hideProgressBar: true });
+        thumbnail: data?.thumbnail?.[0],
+        status: selectedStatus?.id!,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Data berhasil disimpan', { hideProgressBar: true });
+          router.back();
+        },
+      },
+    );
+  };
+
+  useEffect(() => {
+    if (error) {
+      toast.error(`${error}`, { hideProgressBar: true });
     }
-  };
-
-  if (error != null) {
-    toast.error(`Error: ${error}`, { hideProgressBar: true });
-  }
-
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-  };
+  }, [error]);
 
   return (
-    <div className="border rounded-lg bg-white dark:bg-slate-800">
+    <section className="border rounded-lg bg-white dark:bg-slate-800">
       <HeaderContainer title="Kembali" onBackClicked={() => router.back()} />
       <ContentContainer className="flex flex-col">
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -99,13 +114,48 @@ const CreateComicPage = () => {
               containerClassName="basis-1/2"
             />
             <div className="w-3" />
-            <Select
-              {...register('status')}
-              id="status"
-              label="Status"
-              options={statusOptions}
+            <TextField
+              isFullWidth
+              {...register('alternativeTitle')}
+              id="alternativeTitle"
+              label="Alternative Title"
+              errorMessage={errors.alternativeTitle?.message}
               containerClassName="basis-1/2"
-              errorMessage={errors.status?.message}
+            />
+          </div>
+          <div className="flex flex-row">
+            <Controller
+              name="status"
+              control={control}
+              render={({ field: { value, onChange, ...fields } }) => (
+                <Select
+                  {...fields}
+                  id="status"
+                  label="Status"
+                  options={statusOptions}
+                  containerClassName="basis-1/2"
+                  value={value}
+                  errorMessage={errors.status?.message}
+                  onChange={(val) => onChange(val.value)}
+                />
+              )}
+            />
+            <div className="w-3" />
+            <Controller
+              name="type"
+              control={control}
+              render={({ field: { value, onChange, ...fields } }) => (
+                <Select
+                  {...fields}
+                  id="type"
+                  label="Type"
+                  options={typeOptions}
+                  containerClassName="basis-1/2"
+                  value={value}
+                  errorMessage={errors.type?.message}
+                  onChange={(val) => onChange(val.value)}
+                />
+              )}
             />
           </div>
           <div className="flex flex-row">
@@ -153,22 +203,14 @@ const CreateComicPage = () => {
               )}
             />
             <div className="w-3" />
-            <Controller
-              name="publishedAt"
-              control={control}
-              render={({ field: { onChange } }) => (
-                <TextDatePicker
-                  id="publishedAt"
-                  label="Published Year"
-                  containerClassName="basis-1/3"
-                  selectedDate={selectedDate}
-                  onChange={(date) => {
-                    onChange(date);
-                    handleDateChange(date);
-                  }}
-                  errorMessage={errors.publishedAt?.message}
-                />
-              )}
+            <TextField
+              isFullWidth
+              {...register('publishedDate')}
+              id="publishedDate"
+              label="Published Date"
+              errorMessage={errors.publishedDate?.message}
+              containerClassName="basis-1/2"
+              type="date"
             />
           </div>
           <TextArea
@@ -201,10 +243,10 @@ const CreateComicPage = () => {
             </div>
           </div>
           <div className="h-6" />
-          <Button id="btn-submit" title="Submit" type="submit" loading={loading} />
+          <Button id="btn-submit" title="Submit" type="submit" loading={isLoading} />
         </form>
       </ContentContainer>
-    </div>
+    </section>
   );
 };
 

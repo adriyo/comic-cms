@@ -89,11 +89,12 @@ const Table = ({
   );
 };
 
-const formatDateToString = (date: string | null): string => {
-  if (!date) return '-';
-  const parsedDate = new Date(date);
+const formatDateToString = (dateString: string | null): string => {
+  if (!dateString) return '-';
+  const [day, month, year] = dateString.split('-');
+  const date = new Date(`${year}-${month}-${day}`);
   const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
-  return parsedDate.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('en-US', options);
 };
 
 const getThumbnailInfo = (thumbnail: string | null): { src: string; type?: string } => {

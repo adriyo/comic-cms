@@ -19,12 +19,13 @@ export interface InputProps {
 export interface Select2Props extends InputProps {
   options: SelectOption[];
   onOptionSelected?: (option: SelectOption) => void;
-  control: any;
+  control?: any;
 }
 
 export interface TextFieldProps extends InputProps {
   onChange?: ChangeEventHandler<HTMLInputElement>;
   onEnterPress?: () => void;
+  pattern?: string;
 }
 
 export interface TextAreaProps extends InputProps {
@@ -34,6 +35,7 @@ export interface TextAreaProps extends InputProps {
 export interface SelectProps extends InputProps {
   options: SelectOption[];
   selectedOption?: SelectOption;
+  onChange?: (val: SelectOption) => void;
 }
 
 export type SelectOption = {

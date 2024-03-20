@@ -45,12 +45,14 @@ export interface Tag {
 
 export interface ComicRequest {
   title: string;
-  author: SelectOption;
-  thumbnail: File;
-  publicationYear: Date;
-  status: string;
-  description?: string;
-  genre: SelectOption;
+  alternativeTitle?: string;
+  authors?: number[];
+  thumbnail?: File;
+  published_date?: string;
+  status: number;
+  type: number;
+  description: string;
+  genres?: number[];
 }
 
 export interface ComicsResponse {
@@ -69,4 +71,11 @@ export interface ChapterResponse {
 export interface PagingRequest {
   page: number;
   limit: number;
+}
+
+export interface PostComicResponse {
+  errors: {
+    [key: string]: string;
+  };
+  message?: string;
 }

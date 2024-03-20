@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { generateDummyChapters, generateRandomSlugId } from './mocks';
-import { ChapterResponse, Comic, ComicRequest, ComicsResponse, PagingRequest } from './types';
+import { generateDummyChapters } from './mocks';
+import { ChapterResponse, Comic, ComicsResponse, PagingRequest } from './types';
 import { useQuery } from 'react-query';
 import { ApiRoute, LocalStorageKeys } from '@/utils/constants';
 
@@ -132,41 +132,4 @@ const parseComicsData = (comicsDataJSON: string | null) => {
   return parsedComics;
 };
 
-const useComic = () => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const saveComic = async (request: ComicRequest) => {
-    try {
-      setLoading(true);
-      const thumbnailBase64 = await fileToBase64(request.thumbnail);
-
-      const comic: Comic = {
-        id: generateRandomSlugId(),
-        title: request.title,
-        authors: [{ id: request.author.id, name: request.author.label }],
-        status: request.status,
-        thumbnail: thumbnailBase64,
-        image_cover: null,
-        description: request.description,
-        genres: [request.genre!],
-        updatedAt: Date(),
-        published_date: null,
-      };
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const existingComicsJSON = localStorage.getItem('savedComics');
-      const existingComics = existingComicsJSON ? JSON.parse(existingComicsJSON) : [];
-      const updatedComics = [...existingComics, comic];
-      localStorage.setItem('savedComics', JSON.stringify(updatedComics));
-      setError(null);
-    } catch (error) {
-      setError('Error saving comic');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { saveComic, error, loading };
-};
-
-export { useFetchComics, useFetchDetail, useFetchChapters, useComic };
+export { useFetchComics, useFetchDetail, useFetchChapters };
