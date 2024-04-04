@@ -46,13 +46,21 @@ export interface Tag {
 export interface ComicRequest {
   title: string;
   alternativeTitle?: string;
-  authors?: number[];
   thumbnail?: File;
   published_date?: string;
   status: number;
   type: number;
   description: string;
+  authors?: number[];
   genres?: number[];
+  tags?: number[];
+  artists?: number[];
+  translators?: number[];
+  newAuthors?: string[];
+  newGenres?: string[];
+  newTags?: string[];
+  newArtists?: string[];
+  newTranslators?: string[];
 }
 
 export interface ComicsResponse {
@@ -78,4 +86,12 @@ export interface PostComicResponse {
     [key: string]: string;
   };
   message?: string;
+}
+
+export interface ComicOptions {
+  authors: SelectOption[];
+  genres: SelectOption[];
+  tags: SelectOption[];
+  artists: SelectOption[];
+  translators: SelectOption[];
 }

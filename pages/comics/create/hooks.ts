@@ -1,14 +1,28 @@
 import { SelectOption } from '@/components/Input/types';
-import { Author, ComicRequest, Genre, PostComicResponse } from '../types';
+import { ComicRequest, PostComicResponse } from '../types';
 import { ApiRoute, LocalStorageKeys } from '@/utils/constants';
 import { useMutation } from 'react-query';
 
 const useOptions = () => {
   const existingGenres = localStorage.getItem(LocalStorageKeys.GENRES);
   const existingAuthors = localStorage.getItem(LocalStorageKeys.AUTHORS);
-  const genreOptions = parseGenresOption(existingGenres);
-  const authorOptions = parseAuthorsOption(existingAuthors);
-  return { genreOptions, authorOptions, statusOptions, typeOptions };
+  const existingTags = localStorage.getItem(LocalStorageKeys.TAGS);
+  const existingArtists = localStorage.getItem(LocalStorageKeys.ARTISTS);
+  const existingTranslators = localStorage.getItem(LocalStorageKeys.TRANSLATORS);
+  const genreOptions = parseOptions(existingGenres);
+  const authorOptions = parseOptions(existingAuthors);
+  const tagOptions = parseOptions(existingTags);
+  const artistOptions = parseOptions(existingArtists);
+  const translatorOptions = parseOptions(existingTranslators);
+  return {
+    genreOptions,
+    authorOptions,
+    statusOptions,
+    typeOptions,
+    tagOptions,
+    artistOptions,
+    translatorOptions,
+  };
 };
 
 const statusOptions: SelectOption[] = [
@@ -23,38 +37,18 @@ const typeOptions: SelectOption[] = [
   { id: 3, value: '3', label: 'Webtoon' },
 ];
 
-const parseGenresOption = (genresJSON: string | null): SelectOption[] => {
-  if (!genresJSON) {
+const parseOptions = (optionsJSON: string | null): SelectOption[] => {
+  if (!optionsJSON) {
     return [];
   }
 
-  const parsedData = JSON.parse(genresJSON);
+  const parsedData = JSON.parse(optionsJSON);
 
   if (!Array.isArray(parsedData)) {
     return [];
   }
 
-  const result = parsedData.map((item: Genre) => ({
-    id: +item.id,
-    value: item.name || '',
-    label: item.name || '',
-  }));
-
-  return result;
-};
-
-const parseAuthorsOption = (genresJSON: string | null): SelectOption[] => {
-  if (!genresJSON) {
-    return [];
-  }
-
-  const parsedData = JSON.parse(genresJSON);
-
-  if (!Array.isArray(parsedData)) {
-    return [];
-  }
-
-  const result = parsedData.map((item: Author) => ({
+  const result = parsedData.map((item: SelectOption) => ({
     id: +item.id,
     value: item.name || '',
     label: item.name || '',
@@ -68,16 +62,64 @@ const postComic = (data: ComicRequest): Promise<PostComicResponse> => {
   formData.append('title', data.title);
   if (data.alternativeTitle) formData.append('alternative_title', data.alternativeTitle);
   if (data.authors) {
-    data.authors.forEach((author: number) => {
-      formData.append('authors', `${author}`);
+    data.authors.forEach((id: number) => {
+      formData.append('authors', `${id}`);
+    });
+  }
+  if (data.newAuthors) {
+    data.newAuthors.forEach((name: string) => {
+      formData.append('new_authors', `${name}`);
     });
   }
 
   if (data.genres) {
-    data.genres.forEach((genre: number) => {
-      formData.append('genres', `${genre}`);
+    data.genres.forEach((id: number) => {
+      formData.append('genres', `${id}`);
     });
   }
+
+  if (data.newGenres) {
+    data.newGenres.forEach((name: string) => {
+      formData.append('new_genres', `${name}`);
+    });
+  }
+
+  if (data.tags) {
+    data.tags.forEach((id: number) => {
+      formData.append('tags', `${id}`);
+    });
+  }
+
+  if (data.newTags) {
+    data.newTags.forEach((name: string) => {
+      formData.append('new_tags', `${name}`);
+    });
+  }
+
+  if (data.artists) {
+    data.artists.forEach((id: number) => {
+      formData.append('artists', `${id}`);
+    });
+  }
+
+  if (data.newArtists) {
+    data.newArtists.forEach((name: string) => {
+      formData.append('new_artists', `${name}`);
+    });
+  }
+
+  if (data.translators) {
+    data.translators.forEach((id: number) => {
+      formData.append('translators', `${id}`);
+    });
+  }
+
+  if (data.newTranslators) {
+    data.newTranslators.forEach((name: string) => {
+      formData.append('new_translators', `${name}`);
+    });
+  }
+
   formData.append('type', `${data.type}`);
   if (data.published_date) formData.append('published_date', data.published_date);
   formData.append('status', `${data.status}`);

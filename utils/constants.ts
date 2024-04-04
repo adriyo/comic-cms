@@ -9,6 +9,9 @@ export const LocalStorageKeys = {
   USER_INFO: 'userInfo',
   GENRES: 'genres',
   AUTHORS: 'authors',
+  TRANSLATORS: 'translators',
+  TAGS: 'tags',
+  ARTISTS: 'artists',
 } as const;
 
 export const Routes = {
@@ -28,8 +31,7 @@ export const ApiRoute = {
   LOGIN: BASE_URL + '/user/login',
   REGISTER: BASE_URL + '/user/register',
   COMICS: BASE_URL + '/comics',
-  GENRES: BASE_URL + '/genres',
-  AUTHORS: BASE_URL + '/authors',
+  COMIC_OPTIONS: BASE_URL + '/comics/options',
 } as const;
 
 Object.freeze(Routes);

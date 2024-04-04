@@ -1,7 +1,7 @@
 import { ApiRoute, LocalStorageKeys } from '@/utils/constants';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 import { LoginRequest, LoginResponse } from './types';
-import { Author, Genre } from '../comics/types';
+import { ComicOptions } from '../comics/types';
 
 const fetchLogin = (data: LoginRequest): Promise<LoginResponse> =>
   fetch(ApiRoute.LOGIN, {
@@ -13,17 +13,8 @@ const fetchLogin = (data: LoginRequest): Promise<LoginResponse> =>
     body: JSON.stringify({ email: data.email, password: data.password }),
   }).then((res) => res.json());
 
-const fetchGenres = (): Promise<Genre[]> =>
-  fetch(ApiRoute.GENRES, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-  }).then((res) => res.json());
-
-const fetchAuthors = (): Promise<Author[]> =>
-  fetch(ApiRoute.AUTHORS, {
+const fetchComicOptions = (): Promise<ComicOptions> =>
+  fetch(ApiRoute.COMIC_OPTIONS, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
@@ -42,10 +33,18 @@ const useLogin = () => {
       localStorage.setItem(LocalStorageKeys.USER_INFO, JSON.stringify(result.data));
       localStorage.setItem(LocalStorageKeys.ACCESS_TOKEN, result.data.token);
 
-      const genres = await fetchGenres();
-      const authors = await fetchAuthors();
+      const comicOptionsResult = await fetchComicOptions();
+      const genres = comicOptionsResult.genres;
+      const authors = comicOptionsResult.authors;
+      const tags = comicOptionsResult.tags;
+      const artists = comicOptionsResult.artists;
+      const translators = comicOptionsResult.translators;
+
       localStorage.setItem(LocalStorageKeys.GENRES, JSON.stringify(genres));
       localStorage.setItem(LocalStorageKeys.AUTHORS, JSON.stringify(authors));
+      localStorage.setItem(LocalStorageKeys.TAGS, JSON.stringify(tags));
+      localStorage.setItem(LocalStorageKeys.ARTISTS, JSON.stringify(artists));
+      localStorage.setItem(LocalStorageKeys.TRANSLATORS, JSON.stringify(translators));
     },
   });
   return {

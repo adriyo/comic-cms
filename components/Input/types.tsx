@@ -22,6 +22,12 @@ export interface Select2Props extends InputProps {
   control?: any;
 }
 
+export interface SelectMultipleProps extends InputProps {
+  options: SelectOption[];
+  control?: any;
+  onSelectedOptionsChange?: (options: SelectOption[]) => void;
+}
+
 export interface TextFieldProps extends InputProps {
   onChange?: ChangeEventHandler<HTMLInputElement>;
   onEnterPress?: () => void;
@@ -42,6 +48,7 @@ export type SelectOption = {
   id: number;
   label: string;
   value?: string;
+  name?: string;
 };
 
 export interface DropdownProps extends InputProps {
@@ -54,3 +61,9 @@ export type DropdownOption = {
   label: string;
   value?: string;
 };
+
+export interface BadgeProps {
+  option: SelectOption;
+  showActionButton?: boolean;
+  onDelete: () => void;
+}
