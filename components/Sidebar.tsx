@@ -60,7 +60,6 @@ const Sidebar = ({ navItems = defaultNavItems }: Props) => {
       <aside className="bg-base-100 w-80 h-full">
         <div className="bg-base-100 sticky top-0 z-20 items-center bg-opacity-90 px-4 py-2 backdrop-blur lg:flex">
           <Link href={Routes.COMICS} className="flex-0 btn btn-ghost px-2">
-            <Image src={'/next.svg'} alt="icon" width={30} height={30} />{' '}
             <div className="font-title inline-flex text-lg md:text-2xl">
               <span className="uppercase text-[#1AD1A5]">CMS</span>
             </div>

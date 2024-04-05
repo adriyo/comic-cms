@@ -1,12 +1,12 @@
 import Button from '@/components/Button';
 import ContentContainer from '@/components/ContentContainer';
 import HeaderContainer from '@/components/HeaderContainer';
-import { Select2, Select, TextArea, TextField } from '@/components/Input';
+import { Select, TextArea, TextField } from '@/components/Input';
 import { SelectOption } from '@/components/Input/types';
 import RootLayout from '@/components/RootLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { z } from 'zod';

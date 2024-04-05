@@ -1,24 +1,11 @@
-import { useEffect, useState } from 'react';
-import { generateDummyChapters } from './mocks';
-import { ChapterResponse, Comic, ComicsResponse, PagingRequest } from './types';
+import { useState } from 'react';
+import { Chapter, ChapterResponse, Comic, ComicsResponse, PagingRequest } from './types';
 import { useQuery } from 'react-query';
-import { ApiRoute, LocalStorageKeys } from '@/utils/constants';
+import { ApiRoute } from '@/utils/constants';
+import { useFetch } from '@/utils/network/hooks';
 
 const fetchComics = (data: PagingRequest) =>
-  fetch(`${ApiRoute.COMICS}?page=${data.page}&limit=${data.limit}`, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${localStorage.getItem(LocalStorageKeys.ACCESS_TOKEN)}`,
-    },
-  }).then(async (res) => {
-    const data = (await res.json()) as ComicsResponse;
-    if (!res.ok) {
-      throw Error(data.message);
-    }
-    return data;
-  });
+  useFetch<ComicsResponse>({ url: `${ApiRoute.COMICS}?page=${data.page}&limit=${data.limit}` });
 
 const useFetchComics = (req: PagingRequest) => {
   const { isLoading, error, data } = useQuery<ComicsResponse, Error>({
@@ -30,50 +17,43 @@ const useFetchComics = (req: PagingRequest) => {
 };
 
 const useFetchDetail = (id: string) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [response, setResponse] = useState<Comic | null>(null);
-
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = () => {
-      setTimeout(() => {
-        const existingComicsJSON = localStorage.getItem('savedComics');
-        const parsedComics = parseComicsData(existingComicsJSON);
-
-        setResponse(parsedComics[0]);
-        setLoading(false);
-      }, 1000);
-    };
-
-    fetchData();
-  }, [id]);
-  return { response, loading };
+  const { isLoading, error, data, refetch } = useQuery<Comic, Error>({
+    queryKey: ['comic-detail', id],
+    queryFn: () => useFetch<Comic>({ url: `${ApiRoute.COMICS}/${id}` }),
+    enabled: false,
+    keepPreviousData: true,
+  });
+  return { data, isLoading, error, refetch };
 };
 
-const useFetchChapters = ({ page = 1 }) => {
-  const [loading, setLoading] = useState<boolean>(true);
+const useFetchChapters = ({ comicId = '', page = 1 }) => {
   const [response, setResponse] = useState<ChapterResponse>({
     data: [],
     totalPage: 0,
     totalCount: 0,
   });
 
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = () => {
-      setTimeout(() => {
-        setResponse({
-          data: generateDummyChapters(),
-          totalPage: 10,
-          totalCount: 100,
-        });
-        setLoading(false);
-      }, 1500);
-    };
+  const updateResponseData = (newData: Chapter[], newTotalPage: number, newTotalCount: number) => {
+    setResponse({
+      data: newData,
+      totalPage: newTotalPage,
+      totalCount: newTotalCount,
+    });
+  };
 
-    fetchData();
-  }, [page]);
-  return { response, loading };
+  const { isLoading, error, refetch } = useQuery<Chapter[], Error>({
+    queryKey: ['comic-chapters', comicId, page],
+    queryFn: () =>
+      useFetch<Chapter[]>({
+        url: `${ApiRoute.COMICS}/${comicId}/chapters`,
+        onSuccess(data) {
+          updateResponseData(data, 1, data.length);
+        },
+      }),
+    enabled: false,
+    keepPreviousData: true,
+  });
+  return { response, isLoading, error, refetch };
 };
 
 type FileToBase64 = (file: File) => Promise<string>;

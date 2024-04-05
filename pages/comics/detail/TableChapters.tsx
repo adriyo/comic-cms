@@ -48,7 +48,7 @@ const TableChapters = ({
                 onClick={() => onRowChapterClicked(item)}
               >
                 <td>{item.title}</td>
-                <td>{item.updatedAt}</td>
+                <td>{item.updated_at}</td>
                 <td>
                   <Link href={Routes.EDIT_CHAPTER}>
                     <Button id="btn-edit" title="Edit" className="pl-5 pr-5" small />

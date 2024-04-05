@@ -29,8 +29,8 @@ export interface Genre {
 export interface Chapter {
   id: number;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Artist {
