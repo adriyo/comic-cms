@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { Routes } from '../../../utils/constants';
 import Button from '@/components/Button';
 import { ChangeEventHandler, useEffect, useState } from 'react';
-import { Author, Comic } from '../types';
+import { Comic } from '../types';
 import { TextField } from '@/components/Input';
 import Table from './components/Table';
 import { useRouter } from 'next/router';
 import { useFetchComics } from '../hooks';
 import ContentContainer from '@/components/ContentContainer';
 import { toast } from 'react-toastify';
+import { SelectOption } from '@/components/Input/types';
 
 const TextSearch = ({
   onChange,
@@ -55,8 +56,9 @@ const ComicsPage = () => {
     const copyComics = structuredClone(comics);
     const filteredComics = copyComics.filter((i: Comic) => {
       if (queryBy == 'by-author') {
-        return i.authors.some((author: Author) =>
-          author.name.toLowerCase().includes(query.toLowerCase()),
+        if (!i.authors) return false;
+        return i.authors.some((author: SelectOption) =>
+          author.label.toLowerCase().includes(query.toLowerCase()),
         );
       } else {
         return i.title.toLowerCase().includes(query.toLowerCase());

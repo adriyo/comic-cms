@@ -1,8 +1,9 @@
 import Button from '@/components/Button';
 import Pagination from '../Pagination';
-import { Author, Comic } from '../../../types';
+import { Comic } from '../../../types';
 import Image from 'next/image';
 import { TableProps } from './types';
+import { SelectOption } from '@/components/Input/types';
 
 const Table = ({
   comics = [],
@@ -60,7 +61,7 @@ const Table = ({
                 <td>{getAuthorNames(item.authors)}</td>
                 <td>{formatDateToString(item.published_date)}</td>
                 <td>
-                  <div className="flex flex-row items-center">{item.status}</div>
+                  <div className="flex flex-row items-center">{item.status?.label}</div>
                 </td>
                 <td>
                   <Button
@@ -111,7 +112,8 @@ const getThumbnailInfo = (thumbnail: string | null): { src: string; type?: strin
   }
 };
 
-const getAuthorNames = (authors: Author[]) => {
+const getAuthorNames = (authors?: SelectOption[]) => {
+  if (!authors) return '';
   if (authors.length == 0) return 'Unknown';
   return authors.map((author) => author.name).join(', ');
 };

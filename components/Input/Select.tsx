@@ -1,4 +1,4 @@
-import { ChangeEvent, ChangeEventHandler, forwardRef } from 'react';
+import { ChangeEvent, forwardRef } from 'react';
 import { SelectProps } from './types';
 
 const Select = (
@@ -24,8 +24,8 @@ const Select = (
         id={id}
         key={id}
         ref={ref}
-        defaultValue={value}
         onChange={handleOnChange}
+        value={value}
       >
         {options.map((option) => (
           <option key={option.id} value={option.value}>
