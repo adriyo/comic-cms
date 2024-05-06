@@ -14,6 +14,7 @@ import { useComic, useOptions } from './hooks';
 import SelectMultiple from '@/components/Input/SelectMultiple';
 import { useFetchDetail } from '../hooks';
 import { ComicRequest } from '../types';
+import Image from 'next/image';
 
 const MAX_FILE_SIZE = 500000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -23,6 +24,15 @@ const optionSchema = z.object({
   label: z.string(),
   value: z.string(),
 });
+
+const fileSchema = z
+  .custom<File[]>()
+  .refine((files) => files?.length == 1, 'Image is required.')
+  .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+  .refine(
+    (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type || ''),
+    '.jpg, .jpeg, .png and .webp files are accepted.',
+  );
 
 const validationSchema = z.object({
   title: z.string().min(1, { message: 'Required title' }),
@@ -35,14 +45,7 @@ const validationSchema = z.object({
   artists: z.array(optionSchema).optional(),
   translators: z.array(optionSchema).optional(),
   publishedDate: z.string().optional(),
-  thumbnail: z
-    .custom<File[]>()
-    .refine((files) => files?.length == 1, 'Image is required.')
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      '.jpg, .jpeg, .png and .webp files are accepted.',
-    ),
+  thumbnail: z.custom<File[]>().optional(),
   description: z.string().min(1, { message: 'Required description' }),
 });
 
@@ -71,6 +74,7 @@ const CreateComicPage = () => {
   } = useOptions();
   const { isLoading, error, mutate } = useComic();
   const [isRouterReady, setRouterReady] = useState<Boolean>(false);
+  const [errorThumbnail, setErrorThumbnail] = useState<String>();
   const router = useRouter();
   const slugId = router.query.id as string | undefined;
   const {
@@ -86,6 +90,7 @@ const CreateComicPage = () => {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
@@ -101,6 +106,17 @@ const CreateComicPage = () => {
   });
 
   const onSubmit: SubmitHandler<ValidationSchema> = async (data) => {
+    if (data.thumbnail && data.thumbnail.length > 0) {
+      try {
+        fileSchema.parse(data.thumbnail);
+        setErrorThumbnail(undefined);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          setErrorThumbnail(error.issues[0].message);
+        }
+        return;
+      }
+    }
     const selectedStatus: SelectOption | undefined = statusOptions.find(
       (option) => option.value === data.status,
     );
@@ -137,6 +153,7 @@ const CreateComicPage = () => {
       .map((option) => option.label);
 
     const requestBody: ComicRequest = {
+      id: slugId,
       title: data.title,
       alternativeTitle: data.alternativeTitle,
       type: selectedType?.id!,
@@ -175,7 +192,6 @@ const CreateComicPage = () => {
     if (detailResponse.type) {
       setValue('type', detailResponse.type.id.toString());
     }
-
     if (detailResponse.published_date) {
       const parsedDate = formatDate(detailResponse.published_date);
       setValue('publishedDate', parsedDate);
@@ -442,21 +458,18 @@ const CreateComicPage = () => {
               <label htmlFor="thumbnail" className="label text-sm">
                 <span className="label-text">Thumbnail</span>
               </label>
+              <ImageCoverPreview file={watch('thumbnail')?.[0]} src={detailResponse?.image_cover} />
               <input
                 {...register('thumbnail')}
                 type="file"
                 accept=".jpg, .jpeg, .png, .webp"
                 className="file-input file-input-bordered file-input-sm"
               />
-              {errors.thumbnail?.message ? (
+              {errorThumbnail ? (
                 <label className="label">
-                  <span className="label-text-alt text-red-500">
-                    {errors.thumbnail?.message + ''}
-                  </span>
+                  <span className="label-text-alt text-red-500">{`${errorThumbnail}`}</span>
                 </label>
-              ) : (
-                ''
-              )}
+              ) : null}
             </div>
           </div>
           <div className="h-6" />
@@ -464,6 +477,20 @@ const CreateComicPage = () => {
         </form>
       </ContentContainer>
     </section>
+  );
+};
+
+const ImageCoverPreview = ({ file, src }: { file?: File; src?: string }) => {
+  if (!file && !src) return null;
+  return (
+    <Image
+      src={file ? URL.createObjectURL(file) : src || ''}
+      alt="comic thumbnail"
+      width={200}
+      height={200}
+      style={{ width: 'auto', height: 'auto' }}
+      priority={false}
+    />
   );
 };
 

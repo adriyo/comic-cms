@@ -9,7 +9,7 @@ export interface Comic {
   translators?: SelectOption[];
   updatedAt: string;
   thumbnail?: string;
-  image_cover: string | null;
+  image_cover?: string;
   published_date: string | null;
   rating?: number;
   tags?: SelectOption[];
@@ -47,6 +47,7 @@ export interface Tag {
 }
 
 export interface ComicRequest {
+  id?: string;
   title: string;
   alternativeTitle?: string;
   thumbnail?: File;

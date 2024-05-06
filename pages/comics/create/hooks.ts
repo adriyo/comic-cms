@@ -126,8 +126,11 @@ const postComic = (data: ComicRequest): Promise<PostComicResponse> => {
   formData.append('status', `${data.status}`);
   if (data.thumbnail) formData.append('image_cover', data.thumbnail);
   formData.append('description', data.description);
-  return fetch(ApiRoute.COMICS, {
-    method: 'POST',
+
+  const idPrefixUrl: string = data.id ? `/${data.id}` : '';
+
+  return fetch(ApiRoute.COMICS + idPrefixUrl, {
+    method: data.id ? 'PUT' : 'POST',
     headers: {
       Authorization: `Basic ${localStorage.getItem(LocalStorageKeys.ACCESS_TOKEN)}`,
     },

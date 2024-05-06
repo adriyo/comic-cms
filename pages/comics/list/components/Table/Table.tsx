@@ -98,7 +98,7 @@ const formatDateToString = (dateString: string | null): string => {
   return date.toLocaleDateString('en-US', options);
 };
 
-const getThumbnailInfo = (thumbnail: string | null): { src: string; type?: string } => {
+const getThumbnailInfo = (thumbnail?: string): { src: string; type?: string } => {
   if (!thumbnail) {
     return { src: '' };
   }
