@@ -3,15 +3,18 @@ import { SelectOption } from '@/components/Input/types';
 export interface Comic {
   id: string;
   title: string;
-  authors: Author[];
+  alternative_title?: string;
+  type: SelectOption;
+  authors?: SelectOption[];
+  translators?: SelectOption[];
   updatedAt: string;
   thumbnail?: string;
-  image_cover: string | null;
+  image_cover?: string;
   published_date: string | null;
   rating?: number;
-  tags?: Tag[];
-  status?: string;
-  artist?: SelectOption[];
+  tags?: SelectOption[];
+  status?: SelectOption;
+  artists?: SelectOption[];
   description?: string;
   genres?: SelectOption[];
 }
@@ -44,6 +47,7 @@ export interface Tag {
 }
 
 export interface ComicRequest {
+  id?: string;
   title: string;
   alternativeTitle?: string;
   thumbnail?: File;

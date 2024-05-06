@@ -1,4 +1,3 @@
-import { useController } from 'react-hook-form';
 import { ForwardedRef, forwardRef, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { SelectMultipleProps, SelectOption } from './types';
 import Badge from './Badge';
@@ -12,6 +11,7 @@ const SelectMultiple = (
     errorMessage,
     containerClassName,
     onSelectedOptionsChange,
+    onDefaultValueChange,
     ...props
   }: SelectMultipleProps,
   ref: ForwardedRef<HTMLInputElement>,
@@ -19,17 +19,15 @@ const SelectMultiple = (
   const [searchTerm, setSearchTerm] = useState('');
   const [visible, setVisible] = useState<boolean>(false);
   const [options, setOptions] = useState<SelectOption[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<SelectOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<SelectOption[]>(value || []);
+  const [isValueUpdated, setIsValueUpdated] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const {
-    field: { onChange },
-    fieldState: { error },
-  } = useController({ name: id || '', control: props.control });
 
   const handleOptionClick = (option: SelectOption) => {
     setSearchTerm('');
-    setSelectedOptions((prevOptions) => [...prevOptions, option]);
-    onChange();
+    const updatedOptions = [...selectedOptions, option];
+    setSelectedOptions(updatedOptions);
+    onSelectedOptionsChange?.(updatedOptions);
     inputRef.current?.focus();
   };
 
@@ -40,6 +38,13 @@ const SelectMultiple = (
   useEffect(() => {
     onSelectedOptionsChange?.(selectedOptions);
   }, [selectedOptions]);
+
+  useEffect(() => {
+    if (value && value.length > 0 && !isValueUpdated) {
+      setSelectedOptions(value);
+      setIsValueUpdated(true);
+    }
+  }, [value]);
 
   const handleOnFocusIn = (event: any) => {
     setVisible(true);
@@ -69,7 +74,9 @@ const SelectMultiple = (
   };
 
   const handleBadgeDelete = (option: SelectOption) => {
-    setSelectedOptions((prevOptions) => prevOptions.filter((item) => item !== option));
+    const removedItems = selectedOptions.filter((item) => item.id !== option.id);
+    setSelectedOptions(removedItems);
+    onSelectedOptionsChange?.(selectedOptions);
   };
 
   return (
@@ -113,7 +120,10 @@ const SelectMultiple = (
             <ul className="menu">
               {options
                 .filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
-                .filter((option) => !selectedOptions.includes(option))
+                .filter(
+                  (option) =>
+                    !selectedOptions.some((selectedOption) => selectedOption.id === option.id),
+                )
                 .map((option) => (
                   <li key={option.value} onClick={() => handleOptionClick(option)}>
                     <a>{option.label}</a>

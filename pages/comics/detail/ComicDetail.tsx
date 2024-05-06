@@ -27,7 +27,12 @@ const Sidebar = ({ comic }: { comic: Comic }) => {
         />
       </div>
       <div className="h-1" />
-      <Link href={Routes.CREATE_COMIC}>
+      <Link
+        href={{
+          pathname: Routes.CREATE_COMIC,
+          query: { id: comic.id },
+        }}
+      >
         <Button id="btnUpdateInfo" title="Ubah Info" className="btn-outline" isFullWidth small />
       </Link>
       <div className="h-1" />
@@ -91,7 +96,7 @@ const ComicDetail = () => {
                 <article>{detailResponse?.description}</article>
                 {detailResponse?.genres?.map((genre) => (
                   <div className="badge badge-ghost mr-1" key={genre.id}>
-                    {genre.label}
+                    {genre.name}
                   </div>
                 ))}
               </div>

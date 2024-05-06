@@ -22,9 +22,16 @@ export interface Select2Props extends InputProps {
   control?: any;
 }
 
-export interface SelectMultipleProps extends InputProps {
+export interface SelectMultipleProps {
   options: SelectOption[];
   control?: any;
+  value?: SelectOption[];
+  placeholder?: string | undefined;
+  id?: string | undefined;
+  label?: string | undefined;
+  errorMessage?: string | null;
+  containerClassName?: string;
+  onDefaultValueChange?: any;
   onSelectedOptionsChange?: (options: SelectOption[]) => void;
 }
 

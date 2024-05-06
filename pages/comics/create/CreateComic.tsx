@@ -6,12 +6,15 @@ import { SelectOption } from '@/components/Input/types';
 import RootLayout from '@/components/RootLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { z } from 'zod';
 import { useComic, useOptions } from './hooks';
 import SelectMultiple from '@/components/Input/SelectMultiple';
+import { useFetchDetail } from '../hooks';
+import { ComicRequest } from '../types';
+import Image from 'next/image';
 
 const MAX_FILE_SIZE = 500000;
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -21,6 +24,15 @@ const optionSchema = z.object({
   label: z.string(),
   value: z.string(),
 });
+
+const fileSchema = z
+  .custom<File[]>()
+  .refine((files) => files?.length == 1, 'Image is required.')
+  .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+  .refine(
+    (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type || ''),
+    '.jpg, .jpeg, .png and .webp files are accepted.',
+  );
 
 const validationSchema = z.object({
   title: z.string().min(1, { message: 'Required title' }),
@@ -33,16 +45,22 @@ const validationSchema = z.object({
   artists: z.array(optionSchema).optional(),
   translators: z.array(optionSchema).optional(),
   publishedDate: z.string().optional(),
-  thumbnail: z
-    .custom<File[]>()
-    .refine((files) => files?.length == 1, 'Image is required.')
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
-      '.jpg, .jpeg, .png and .webp files are accepted.',
-    ),
+  thumbnail: z.custom<File[]>().optional(),
   description: z.string().min(1, { message: 'Required description' }),
 });
+
+const formatDate = (dateString: string, format: string = 'yyyy-MM-dd'): string => {
+  const [day, month, year] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+
+  let formattedDate = format;
+
+  formattedDate = formattedDate.replace('yyyy', String(date.getFullYear()));
+  formattedDate = formattedDate.replace('MM', String(date.getMonth() + 1).padStart(2, '0'));
+  formattedDate = formattedDate.replace('dd', String(date.getDate()).padStart(2, '0'));
+
+  return formattedDate;
+};
 
 const CreateComicPage = () => {
   const {
@@ -55,13 +73,24 @@ const CreateComicPage = () => {
     translatorOptions,
   } = useOptions();
   const { isLoading, error, mutate } = useComic();
+  const [isRouterReady, setRouterReady] = useState<Boolean>(false);
+  const [errorThumbnail, setErrorThumbnail] = useState<String>();
   const router = useRouter();
+  const slugId = router.query.id as string | undefined;
+  const {
+    isLoading: loadingFetchDetail,
+    data: detailResponse,
+    error: errorDetail,
+    refetch,
+  } = useFetchDetail(slugId ?? '');
 
   type ValidationSchema = z.infer<typeof validationSchema>;
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ValidationSchema>({
     resolver: zodResolver(validationSchema),
@@ -77,6 +106,17 @@ const CreateComicPage = () => {
   });
 
   const onSubmit: SubmitHandler<ValidationSchema> = async (data) => {
+    if (data.thumbnail && data.thumbnail.length > 0) {
+      try {
+        fileSchema.parse(data.thumbnail);
+        setErrorThumbnail(undefined);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          setErrorThumbnail(error.issues[0].message);
+        }
+        return;
+      }
+    }
     const selectedStatus: SelectOption | undefined = statusOptions.find(
       (option) => option.value === data.status,
     );
@@ -112,40 +152,132 @@ const CreateComicPage = () => {
       ?.filter((option) => option.value === '')
       .map((option) => option.label);
 
-    mutate(
-      {
-        title: data.title,
-        alternativeTitle: data.alternativeTitle,
-        type: selectedType?.id!,
-        published_date: data.publishedDate,
-        authors: authorIds,
-        newAuthors: newAuthors,
-        genres: genreIds,
-        newGenres: newGenres,
-        tags: tagIds,
-        newTags: newTags,
-        artists: artistIds,
-        newArtists: newArtists,
-        translators: translatorIds,
-        newTranslators: newTranslators,
-        description: data.description,
-        thumbnail: data?.thumbnail?.[0],
-        status: selectedStatus?.id!,
+    const requestBody: ComicRequest = {
+      id: slugId,
+      title: data.title,
+      alternativeTitle: data.alternativeTitle,
+      type: selectedType?.id!,
+      published_date: data.publishedDate,
+      authors: authorIds,
+      newAuthors: newAuthors,
+      genres: genreIds,
+      newGenres: newGenres,
+      tags: tagIds,
+      newTags: newTags,
+      artists: artistIds,
+      newArtists: newArtists,
+      translators: translatorIds,
+      newTranslators: newTranslators,
+      description: data.description,
+      thumbnail: data?.thumbnail?.[0],
+      status: selectedStatus?.id!,
+    };
+
+    mutate(requestBody, {
+      onSuccess: () => {
+        toast.success('Data berhasil disimpan', { hideProgressBar: true });
+        router.back();
       },
-      {
-        onSuccess: () => {
-          toast.success('Data berhasil disimpan', { hideProgressBar: true });
-          router.back();
-        },
-      },
-    );
+    });
   };
+
+  useEffect(() => {
+    if (!detailResponse) return;
+    setValue('title', detailResponse.title);
+    setValue('alternativeTitle', detailResponse.alternative_title);
+    setValue('description', detailResponse.description ?? '');
+    if (detailResponse.status) {
+      setValue('status', detailResponse.status.id.toString());
+    }
+    if (detailResponse.type) {
+      setValue('type', detailResponse.type.id.toString());
+    }
+    if (detailResponse.published_date) {
+      const parsedDate = formatDate(detailResponse.published_date);
+      setValue('publishedDate', parsedDate);
+    }
+
+    if (detailResponse.authors) {
+      setValue(
+        'authors',
+        detailResponse.authors.map((item) => ({
+          id: item.id,
+          label: `${item.name}`,
+          value: item.id.toString(),
+        })),
+      );
+    }
+
+    if (detailResponse.genres) {
+      setValue(
+        'genres',
+        detailResponse.genres.map((item) => ({
+          id: item.id,
+          label: `${item.name}`,
+          value: item.id.toString(),
+        })),
+      );
+    }
+
+    if (detailResponse.tags) {
+      setValue(
+        'tags',
+        detailResponse.tags.map((item) => ({
+          id: item.id,
+          label: `${item.name}`,
+          value: item.id.toString(),
+        })),
+      );
+    }
+
+    if (detailResponse.artists) {
+      setValue(
+        'artists',
+        detailResponse.artists.map((item) => ({
+          id: item.id,
+          label: `${item.name}`,
+          value: item.id.toString(),
+        })),
+      );
+    }
+
+    if (detailResponse.translators) {
+      setValue(
+        'translators',
+        detailResponse.translators.map((item) => ({
+          id: item.id,
+          label: `${item.name}`,
+          value: item.id.toString(),
+        })),
+      );
+    }
+  }, [detailResponse]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    setRouterReady(true);
+    if (slugId) {
+      refetch();
+    }
+  }, [router.isReady]);
 
   useEffect(() => {
     if (error) {
       toast.error(`${error}`, { hideProgressBar: true });
     }
-  }, [error]);
+
+    if (errorDetail) {
+      toast.error(`${errorDetail}`, { hideProgressBar: true });
+    }
+  }, [error, errorDetail]);
+
+  if (!isRouterReady || loadingFetchDetail) {
+    return (
+      <div className="flex p-40 justify-center items-center">
+        <span className="loading loading-lg" />
+      </div>
+    );
+  }
 
   return (
     <section className="border rounded-lg bg-white dark:bg-slate-800">
@@ -211,7 +343,7 @@ const CreateComicPage = () => {
               <Controller
                 name="authors"
                 control={control}
-                render={({ field: { onChange } }) => (
+                render={({ field: { onChange, value } }) => (
                   <SelectMultiple
                     label="Authors"
                     id="authors"
@@ -219,6 +351,7 @@ const CreateComicPage = () => {
                     onSelectedOptionsChange={(value) => {
                       onChange(value);
                     }}
+                    value={value}
                     options={authorOptions}
                     control={control}
                   />
@@ -230,7 +363,7 @@ const CreateComicPage = () => {
               <Controller
                 name="genres"
                 control={control}
-                render={({ field: { onChange } }) => (
+                render={({ field: { onChange, value } }) => (
                   <SelectMultiple
                     label="Genres"
                     id="genres"
@@ -238,6 +371,7 @@ const CreateComicPage = () => {
                     options={genreOptions}
                     control={control}
                     onSelectedOptionsChange={(value) => onChange(value)}
+                    value={value}
                   />
                 )}
               />
@@ -247,7 +381,7 @@ const CreateComicPage = () => {
               <Controller
                 name="tags"
                 control={control}
-                render={({ field: { onChange } }) => (
+                render={({ field: { onChange, value } }) => (
                   <SelectMultiple
                     label="Tags"
                     id="tags"
@@ -255,6 +389,7 @@ const CreateComicPage = () => {
                     onSelectedOptionsChange={(value) => {
                       onChange(value);
                     }}
+                    value={value}
                     options={tagOptions}
                     control={control}
                   />
@@ -267,7 +402,7 @@ const CreateComicPage = () => {
               <Controller
                 name="artists"
                 control={control}
-                render={({ field: { onChange } }) => (
+                render={({ field: { onChange, value } }) => (
                   <SelectMultiple
                     label="Artist"
                     id="artists"
@@ -275,6 +410,7 @@ const CreateComicPage = () => {
                     onSelectedOptionsChange={(value) => {
                       onChange(value);
                     }}
+                    value={value}
                     options={artistOptions}
                     control={control}
                   />
@@ -286,7 +422,7 @@ const CreateComicPage = () => {
               <Controller
                 name="translators"
                 control={control}
-                render={({ field: { onChange } }) => (
+                render={({ field: { onChange, value } }) => (
                   <SelectMultiple
                     label="Translators"
                     id="translators"
@@ -294,6 +430,7 @@ const CreateComicPage = () => {
                     options={translatorOptions}
                     control={control}
                     onSelectedOptionsChange={(value) => onChange(value)}
+                    value={value}
                   />
                 )}
               />
@@ -321,21 +458,18 @@ const CreateComicPage = () => {
               <label htmlFor="thumbnail" className="label text-sm">
                 <span className="label-text">Thumbnail</span>
               </label>
+              <ImageCoverPreview file={watch('thumbnail')?.[0]} src={detailResponse?.image_cover} />
               <input
                 {...register('thumbnail')}
                 type="file"
                 accept=".jpg, .jpeg, .png, .webp"
                 className="file-input file-input-bordered file-input-sm"
               />
-              {errors.thumbnail?.message ? (
+              {errorThumbnail ? (
                 <label className="label">
-                  <span className="label-text-alt text-red-500">
-                    {errors.thumbnail?.message + ''}
-                  </span>
+                  <span className="label-text-alt text-red-500">{`${errorThumbnail}`}</span>
                 </label>
-              ) : (
-                ''
-              )}
+              ) : null}
             </div>
           </div>
           <div className="h-6" />
@@ -343,6 +477,20 @@ const CreateComicPage = () => {
         </form>
       </ContentContainer>
     </section>
+  );
+};
+
+const ImageCoverPreview = ({ file, src }: { file?: File; src?: string }) => {
+  if (!file && !src) return null;
+  return (
+    <Image
+      src={file ? URL.createObjectURL(file) : src || ''}
+      alt="comic thumbnail"
+      width={200}
+      height={200}
+      style={{ width: 'auto', height: 'auto' }}
+      priority={false}
+    />
   );
 };
 

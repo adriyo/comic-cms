@@ -26,14 +26,15 @@ const useOptions = () => {
 };
 
 const statusOptions: SelectOption[] = [
-  { id: 1, value: '1', label: 'On Going' },
+  { id: 0, value: '0', label: 'On Going' },
+  { id: 1, value: '1', label: 'Completed' },
   { id: 2, value: '2', label: 'Hiatus' },
-  { id: 3, value: '3', label: 'Completed' },
 ];
 
 const typeOptions: SelectOption[] = [
-  { id: 1, value: '1', label: 'Manga' },
-  { id: 2, value: '2', label: 'Manhwa' },
+  { id: 0, value: '0', label: 'Manga' },
+  { id: 1, value: '1', label: 'Manhwa' },
+  { id: 2, value: '2', label: 'Manhua' },
   { id: 3, value: '3', label: 'Webtoon' },
 ];
 
@@ -50,7 +51,7 @@ const parseOptions = (optionsJSON: string | null): SelectOption[] => {
 
   const result = parsedData.map((item: SelectOption) => ({
     id: +item.id,
-    value: item.name || '',
+    value: `${item.id}` || '',
     label: item.name || '',
   }));
 
@@ -125,8 +126,11 @@ const postComic = (data: ComicRequest): Promise<PostComicResponse> => {
   formData.append('status', `${data.status}`);
   if (data.thumbnail) formData.append('image_cover', data.thumbnail);
   formData.append('description', data.description);
-  return fetch(ApiRoute.COMICS, {
-    method: 'POST',
+
+  const idPrefixUrl: string = data.id ? `/${data.id}` : '';
+
+  return fetch(ApiRoute.COMICS + idPrefixUrl, {
+    method: data.id ? 'PUT' : 'POST',
     headers: {
       Authorization: `Basic ${localStorage.getItem(LocalStorageKeys.ACCESS_TOKEN)}`,
     },
