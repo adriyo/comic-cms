@@ -4,12 +4,14 @@ import { MdDelete } from 'react-icons/md';
 import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 import { RxUpload } from 'react-icons/rx';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import RootLayout from '@/components/RootLayout';
 import ContentContainer from '@/components/ContentContainer';
 import HeaderContainer from '@/components/HeaderContainer';
 import { useRouter } from 'next/router';
+import { useChapter } from './hooks';
+import { ChapterRequest } from './types';
 
 const PreviewImages = ({ files, onDelete }: { files: File[]; onDelete: (file: File) => void }) => {
   return (
@@ -66,7 +68,9 @@ const UploadContainer = ({ onDrop }: { onDrop: (acceptedFiles: File[]) => void }
 
 const CreateChapter = () => {
   const router = useRouter();
+  const { mutate, error, isLoading } = useChapter();
   const [files, setFiles] = useState<File[]>([]);
+  const [title, setTitle] = useState<string>();
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       console.log(acceptedFiles);
@@ -75,15 +79,29 @@ const CreateChapter = () => {
     [files],
   );
 
-  const notify = () => toast.info('success', { hideProgressBar: true });
-
   const handleOnSubmit = () => {
     if (files.length == 0) {
       toast.error('File image tidak ditemukan', { hideProgressBar: true });
       return;
     }
-    notify();
+    const request: ChapterRequest = {
+      comicId: router.query.slug as string,
+      title: title ?? '',
+      images: files,
+    };
+    mutate(request, {
+      onSuccess: () => {
+        toast.success('success', { hideProgressBar: true });
+        router.back();
+      },
+    });
   };
+
+  useEffect(() => {
+    if (error) {
+      toast.error('', { hideProgressBar: true });
+    }
+  }, [error]);
 
   const handleDeleteFile = (file: File) => {
     const updatedFiles = files.filter((existingFile) => existingFile !== file);
@@ -101,6 +119,7 @@ const CreateChapter = () => {
                 label="Chapters"
                 className="join-item"
                 onEnterPress={handleOnSubmit}
+                onChange={(e) => setTitle(e.target.value)}
                 small
               />
               <div />
@@ -109,6 +128,8 @@ const CreateChapter = () => {
                 title="+ Submit"
                 className="join-item mt-9 mb-0"
                 small
+                disabled={isLoading}
+                loading={isLoading}
                 onClick={handleOnSubmit}
               />
             </div>

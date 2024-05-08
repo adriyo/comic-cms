@@ -36,7 +36,7 @@ const Sidebar = ({ comic }: { comic: Comic }) => {
         <Button id="btnUpdateInfo" title="Ubah Info" className="btn-outline" isFullWidth small />
       </Link>
       <div className="h-1" />
-      <Link href={Routes.CREATE_CHAPTER}>
+      <Link href={`${Routes.CREATE_CHAPTER}/${comic.id}`}>
         <Button id="btnAddChapters" title="+ Tambah Chapters" isFullWidth small />
       </Link>
       <br />

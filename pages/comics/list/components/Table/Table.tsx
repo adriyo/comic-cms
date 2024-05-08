@@ -61,7 +61,7 @@ const Table = ({
                 <td>{getAuthorNames(item.authors)}</td>
                 <td>{formatDateToString(item.published_date)}</td>
                 <td>
-                  <div className="flex flex-row items-center">{item.status?.label}</div>
+                  <div className="flex flex-row items-center">{item.status?.name}</div>
                 </td>
                 <td>
                   <Button
