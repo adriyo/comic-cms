@@ -101,6 +101,7 @@ const ComicDetail = () => {
                 ))}
               </div>
               <TableChapters
+                comicId={detailResponse?.id ?? ''}
                 chapters={chapterResponse.data}
                 currentPage={currentPage}
                 totalPage={chapterResponse.totalPage}

@@ -5,6 +5,7 @@ import { Routes } from '@/utils/constants';
 import Link from 'next/link';
 
 type TableProps = {
+  comicId: string;
   chapters: Chapter[];
   currentPage: number;
   totalPage: number;
@@ -14,6 +15,7 @@ type TableProps = {
 };
 
 const TableChapters = ({
+  comicId = '',
   chapters = [],
   currentPage = 1,
   totalPage = 0,
@@ -50,7 +52,7 @@ const TableChapters = ({
                 <td>{item.title}</td>
                 <td>{item.updated_at}</td>
                 <td>
-                  <Link href={Routes.EDIT_CHAPTER}>
+                  <Link href={`${Routes.CREATE_CHAPTER}/${comicId}/chapter/${item.id}`}>
                     <Button id="btn-edit" title="Edit" className="pl-5 pr-5" small />
                   </Link>
                 </td>

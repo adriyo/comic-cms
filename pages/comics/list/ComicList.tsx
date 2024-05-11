@@ -76,7 +76,10 @@ const ComicsPage = () => {
   }
 
   function handleEditComicClicked(item: Comic): void {
-    router.push(Routes.CREATE_COMIC);
+    router.push({
+      pathname: Routes.CREATE_COMIC,
+      query: { id: item.id },
+    });
   }
 
   useEffect(() => {
